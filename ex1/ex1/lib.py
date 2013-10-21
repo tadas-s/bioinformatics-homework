@@ -7,3 +7,7 @@ def most_repeated(size, genome):
         else:
             result[part] = 1
     return result
+
+def most_repeated_top(number, size, genome):
+    mr = most_repeated(size, genome)
+    return sorted(mr, key=mr.get, reverse=True)[0:2]

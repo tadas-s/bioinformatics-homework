@@ -8,6 +8,14 @@ def most_repeated(size, genome):
             result[part] = 1
     return result
 
+
 def most_repeated_top(number, size, genome):
     mr = most_repeated(size, genome)
-    return sorted(mr, key=mr.get, reverse=True)[0:2]
+    return sorted(mr, key=mr.get, reverse=True)[0:number]
+
+
+def reverse_complement(genome):
+    return ''.join(map(
+        lambda s: {'a': 't', 'g': 'c', 'c': 'g', 't': 'a', 'A': 'T', 'G': 'C', 'C': 'G', 'T': 'A'}[s],
+        genome[::-1])
+    )

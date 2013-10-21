@@ -1,5 +1,5 @@
 from nose.tools import *
-from ex1.lib import most_repeated, most_repeated_top
+from bio.lib import most_repeated, most_repeated_top
 
 
 def test_empty():

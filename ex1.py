@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import fileinput
-from ex1.lib import most_repeated_top
+from bio.lib import most_repeated_top
 
 
 def main(argv):

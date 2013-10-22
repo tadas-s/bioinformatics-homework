@@ -1,28 +1,29 @@
 from nose.tools import *
-from bio.lib import most_repeated, most_repeated_top
+from bio.lib import Genome
 
 
 def test_empty():
-    assert_equal({}, most_repeated(1, ''))
+    assert_equal({}, Genome('').most_repeated(1))
 
 
 def test_too_small():
-    assert_equal({}, most_repeated(5, 'abcd'))
+    assert_equal({}, Genome('abcd').most_repeated(5))
 
 
 def test_nothing_to_do():
-    assert_equal({'abcde': 1}, most_repeated(5, 'abcde'))
+    assert_equal({'abcde': 1}, Genome('abcde').most_repeated(5))
 
 
 def test_basic():
-    assert_equal({'a': 3, 'b': 2, 'c': 1}, most_repeated(1, 'aaabbc'))
+    assert_equal({'a': 3, 'b': 2, 'c': 1}, Genome('aaabbc').most_repeated(1))
 
 
 def test_random_picks():
-    assert_equal(3, most_repeated(2, 'aaabbcaa')['aa'])
-    assert_equal(1, most_repeated(2, 'aaabbcaa')['bb'])
-    assert_equal(1, most_repeated(2, 'aaabbcaa')['bc'])
+    assert_equal(3, Genome('aaabbcaa').most_repeated(2)['aa'])
+    assert_equal(1, Genome('aaabbcaa').most_repeated(2)['bb'])
+    assert_equal(1, Genome('aaabbcaa').most_repeated(2)['bc'])
+
 
 def test_top_occurences():
-    assert_equal([], most_repeated_top(2, 2, ''))
-    assert_equal(['aa', 'ab'], most_repeated_top(2, 2, 'aaabbcaaab'))
+    assert_equal((), Genome('').most_repeated_top(2, 2))
+    assert_equal(('aa', 'ab'), Genome('aaabbcaaab').most_repeated_top(2, 2))

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import sys
 import fileinput
-from bio.lib import reverse_complement
+from bio.lib import Genome
 
 
 def main(argv):
     for line in fileinput.input():
-        print reverse_complement(line.strip())
+        print Genome(line.strip()).reverse_complement()
 
 
 if __name__ == '__main__':

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import sys
 import fileinput
-from bio.lib import most_repeated_top
+from bio.lib import Genome
 
 
 def main(argv):
     for line in fileinput.input(argv[2]):
-        print most_repeated_top(int(argv[0]), int(argv[1]), line)
+        print Genome(line).most_repeated_top(int(argv[0]), int(argv[1]))
 
 
 if __name__ == '__main__':

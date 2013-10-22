@@ -1,3 +1,6 @@
+import re
+
+
 class Genome(str):
     """ Silly genome class """
 
@@ -29,4 +32,4 @@ class Genome(str):
     def positions(self, pattern):
         """ Get positions of a pattern in the given genome
         Returns tuple of indexes"""
-        pass
+        return tuple(m.start() for m in re.finditer("(?=%s)" % pattern, self))

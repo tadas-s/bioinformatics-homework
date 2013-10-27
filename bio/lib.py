@@ -9,10 +9,7 @@ class Genome(str):
         result = {}
         for i in range(0, len(self) - k + 1):
             part = self[i:i+k]
-            if part in result:
-                result[part] += 1
-            else:
-                result[part] = 1
+            result[part] = result.setdefault(part, 0) + 1
         return result
 
     def most_repeated_top(self, k, quantity):
@@ -34,9 +31,28 @@ class Genome(str):
         return set(m.start() for m in re.finditer("(?=%s)" % pattern, self))
 
     def clumps(self, k, region, times):
-        """ Find k-sized patterns which form a clum (i.e. appear times or more) in region-sized region """
-        clumps = []
-        for i in range(0, len(self) - region + 1):
-            mr = Genome(self[i:i+region]).most_repeated(k)
-            clumps += filter(lambda key: mr[key] >= times, mr.keys())
-        return set(clumps)
+        """ Find k-sized patterns which form a clum (i.e. appear times or more) in region-sized region
+        @rtype : set
+        @param k: int
+        @param region: int
+        @param times: int
+        """
+        # Find most repeated items in the first window
+        most_repeated = Genome(self[:region]).most_repeated(k)
+        clumps = set()
+
+        for pattern in most_repeated.iterkeys():
+            if most_repeated[pattern] >= times:
+                clumps.add(pattern)
+
+        # Then slide the window and subtract one structure that went out of the window and add one that was introduced
+        for i in range(1, len(self) - region):
+            removed = self[i-1:i+k-1]
+            introduced = self[i+region-k:i+region]
+            most_repeated[removed] -= 1
+            most_repeated[introduced] = most_repeated.setdefault(introduced, 0) + 1
+
+            if most_repeated[introduced] >= times:
+                clumps.add(introduced)
+
+        return clumps

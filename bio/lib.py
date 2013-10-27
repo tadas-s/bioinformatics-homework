@@ -1,6 +1,5 @@
 import re
 
-
 class Genome(str):
     """ Silly genome class """
 
@@ -20,7 +19,7 @@ class Genome(str):
         """ Find number for top k-mers in genome
         Returns array of k-mers """
         mr = self.most_repeated(k)
-        return tuple(sorted(mr, key=mr.get, reverse=True)[0:quantity])
+        return set(sorted(mr, key=mr.get, reverse=True)[0:quantity])
 
     def reverse_complement(self):
         """ Get reverse complement of given genome """
@@ -32,4 +31,12 @@ class Genome(str):
     def positions(self, pattern):
         """ Get positions of a pattern in the given genome
         Returns tuple of indexes"""
-        return tuple(m.start() for m in re.finditer("(?=%s)" % pattern, self))
+        return set(m.start() for m in re.finditer("(?=%s)" % pattern, self))
+
+    def clumps(self, k, region, times):
+        """ Find k-sized patterns which form a clum (i.e. appear times or more) in region-sized region """
+        clumps = []
+        for i in range(0, len(self) - region + 1):
+            mr = Genome(self[i:i+region]).most_repeated(k)
+            clumps += filter(lambda key: mr[key] >= times, mr.keys())
+        return set(clumps)

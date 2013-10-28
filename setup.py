@@ -7,7 +7,7 @@ config = {
     'description': 'My Project',
     'author': 'Tadas',
     'name': 'skeleton',
-    'install_requires': ['nose']
+    'install_requires': ['nose', 'mock']
 }
 
-setup(, requires=['nose']**config)
+setup(requires=['nose', 'mock']**config)

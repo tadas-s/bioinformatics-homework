@@ -1,7 +1,12 @@
 import re
 
+
 class Genome(str):
     """ Silly genome class """
+
+    def __new__(cls, content):
+        instance = str.__new__(cls, re.sub('[^ctagCTAG]', '', content))
+        return instance
 
     def most_repeated(self, k):
         """ Find most repeated k-mers in genome.
@@ -56,3 +61,19 @@ class Genome(str):
                 clumps.add(introduced)
 
         return clumps
+
+    def skew_values(self):
+        increments = {'c': -1, 'g': 1, 't': 0, 'a': 0}
+        current = 0
+        values = [current]
+
+        for nucleotide in self:
+            current += increments[nucleotide.lower()]
+            values.append(current)
+
+        return tuple(values)
+
+    def skew_min(self):
+        values = self.skew_values()
+        minimum = min(values)
+        return tuple(filter(lambda i: values[i] == minimum, range(0, len(values))))

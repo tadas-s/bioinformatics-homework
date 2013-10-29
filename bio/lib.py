@@ -17,6 +17,19 @@ class Genome(str):
             result[part] = result.setdefault(part, 0) + 1
         return result
 
+    def most_repeated_rough(self, k, d):
+        if 0 == d:
+            return self.most_repeated(k)
+
+        if k <= d:
+            raise ValueError("d-value of %s must be less than k-value '%s'" % (d, k))
+
+        for i in range(0, len(self) - k + 1):
+            part = self[i:i+k]
+            result[part] = result.setdefault(part, 0) + 1
+
+        return result
+
     def most_repeated_top(self, k, quantity):
         """ Find number for top k-mers in genome
         Returns array of k-mers """
@@ -35,26 +48,27 @@ class Genome(str):
         Returns tuple of indexes"""
         return set(m.start() for m in re.finditer("(?=%s)" % pattern, self))
 
-    def search_approximate(self, pattern, d):
+    def search_rough(self, pattern, d):
         """
         @param pattern: str pattern to look for
         @param d: int of max allowed differences
         @return: set of integers
         """
-        if d == 0:
+        if 0 == d:
             return self.search(pattern)
 
-        if d >= len(pattern):
+        if len(pattern) <= d:
             raise ValueError("d-value of %s is too large for pattern '%s'" % (d, pattern))
 
         positions = set()
 
+        pattern_length = len(pattern)
+        min_matches = len(pattern) - d
+        pattern = tuple(pattern)
+
         for i in range(0, len(self) - len(pattern) + 1):
-            matched = reduce(
-                lambda x, y: (int(x[0] == x[1]) if type(x) is tuple else x) + (int(y[0] == y[1]) if type(y) is tuple else y),
-                zip(pattern, self[i:i+len(pattern)])
-            )
-            if matched >= (len(pattern) - d):
+            matched = sum(map(lambda e: e[0] == e[1], zip(pattern, self[i:i+pattern_length])))
+            if matched >= min_matches:
                 positions.add(i)
 
         return positions

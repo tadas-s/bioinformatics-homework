@@ -8,7 +8,7 @@ def main():
     pattern = input_file.readline().strip()
     genome = Genome(input_file.readline())
     d = int(input_file.readline().strip())
-    print(' '.join([str(x) for x in genome.search_approximate(pattern, d)]))
+    print(' '.join([str(x) for x in genome.search_rough(pattern, d)]))
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,4 @@
 import re
-from difflib import SequenceMatcher
 
 class Genome(str):
     """ Silly genome class """
@@ -24,9 +23,29 @@ class Genome(str):
         if k <= d:
             raise ValueError("d-value of %s must be less than k-value '%s'" % (d, k))
 
+        result = {}
+
         for i in range(0, len(self) - k + 1):
             part = self[i:i+k]
-            result[part] = result.setdefault(part, 0) + 1
+
+            if part in result:
+                # bump this part
+                result[part]['count'] += 1
+            else:
+                # bi-directional registration with roughly similar patterns
+                similar = set()
+
+                for other in result.iterkeys():
+                    for shift in range(0, d+1):
+                        shifted = other[shift:]
+                        matched = sum(c[0] == c[1] for c in zip(shifted, part))
+
+                        if matched >= (k - d):
+                            similar.add(other)
+                            result[other]['similar'].add(part)
+
+                # and register this pattern
+                result[part] = {'count': 1, 'similar': similar}
 
         return result
 
@@ -35,6 +54,22 @@ class Genome(str):
         Returns array of k-mers """
         mr = self.most_repeated(k)
         return set(sorted(mr, key=mr.get, reverse=True)[0:quantity])
+
+    def most_repeated_rough_top(self, k, d):
+        mr = self.most_repeated_rough(k, d)
+
+        top_score = 0
+        top = set()
+
+        for pattern in mr.iterkeys():
+            this_score = mr[pattern]['count']
+            for other in mr[pattern]['similar']:
+                this_score += mr[other]['count']
+            if this_score >= top_score:
+                top_score = this_score
+                top = mr[pattern]['similar'].union([pattern])
+
+        return top
 
     def reverse_complement(self):
         """ Get reverse complement of given genome """

@@ -10,4 +10,4 @@ config = {
     'install_requires': ['nose', 'mock']
 }
 
-setup(requires=['nose', 'mock']**config, requires=['mock', 'nose'])
+setup(requires=['nose', 'mock']**config, requires=['mock', 'nose', 'networkx'])

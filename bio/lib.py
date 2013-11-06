@@ -1,4 +1,5 @@
 import re
+import networkx as nx
 
 class Genome(str):
     """ Silly genome class """
@@ -17,59 +18,34 @@ class Genome(str):
         return result
 
     def most_repeated_rough(self, k, d):
-        if 0 == d:
-            return self.most_repeated(k)
+        mr = self.most_repeated(k)
 
-        if k <= d:
-            raise ValueError("d-value of %s must be less than k-value '%s'" % (d, k))
+        gr = nx.Graph()
 
-        result = {}
+        for k_mer in mr.iterkeys():
+            gr.add_node(k_mer, {'count': mr[k_mer]})
 
-        for i in range(0, len(self) - k + 1):
-            part = self[i:i+k]
+        for node_a in gr.nodes_iter():
+            for node_b in gr.nodes_iter():
+                if not gr.has_edge(node_a, node_b) and Genome.is_similar(node_a, node_b, d):
+                    gr.add_edge(node_a, node_b)
 
-            if part in result:
-                # bump this part
-                result[part]['count'] += 1
-            else:
-                # bi-directional registration with roughly similar patterns
-                similar = set()
+        top_result = 0;
+        top_set = []
 
-                for other in result.iterkeys():
-                    for shift in range(0, d+1):
-                        shifted = other[shift:]
-                        matched = sum(c[0] == c[1] for c in zip(shifted, part))
+        for clique in nx.find_cliques(gr):
+            current_count = sum(gr.node[node]['count'] for node in clique)
+            if current_count >= top_result:
+                top_result = current_count
+                top_set = clique
 
-                        if matched >= (k - d):
-                            similar.add(other)
-                            result[other]['similar'].add(part)
-
-                # and register this pattern
-                result[part] = {'count': 1, 'similar': similar}
-
-        return result
+        return top_set
 
     def most_repeated_top(self, k, quantity):
         """ Find number for top k-mers in genome
         Returns array of k-mers """
         mr = self.most_repeated(k)
         return set(sorted(mr, key=mr.get, reverse=True)[0:quantity])
-
-    def most_repeated_rough_top(self, k, d):
-        mr = self.most_repeated_rough(k, d)
-
-        top_score = 0
-        top = set()
-
-        for pattern in mr.iterkeys():
-            this_score = mr[pattern]['count']
-            for other in mr[pattern]['similar']:
-                this_score += mr[other]['count']
-            if this_score >= top_score:
-                top_score = this_score
-                top = mr[pattern]['similar'].union([pattern])
-
-        return top
 
     def reverse_complement(self):
         """ Get reverse complement of given genome """
@@ -157,3 +133,29 @@ class Genome(str):
         values = self.skew_values()
         minimum = min(values)
         return tuple(filter(lambda i: values[i] == minimum, range(0, len(values))))
+
+    @staticmethod
+    def is_similar(kmer_a, kmer_b, max_distance):
+        """ Silly k-mers of the same lenght comparison with up to max_distance modifications
+        @param str kmer_a:
+        @param str kmer_b:
+        @param str max_distance:
+        @return: str
+        """
+        if len(kmer_a) != len(kmer_b):
+            raise ValueError('Cannot compare kmers of different length')
+        if max_distance == 0 or not len(kmer_a):
+            return kmer_a.lower() == kmer_b.lower()
+        else:
+            for shift in range(-max_distance, max_distance + 1):
+                if shift < 0:
+                    shifted = kmer_a[-shift:] + ' '*(-shift)
+                elif shift == 0:
+                    shifted = kmer_a
+                else: # shift > 0
+                    shifted = ' '*shift + kmer_a[:-shift]
+
+                matched = sum(c[0] == c[1] for c in zip(shifted, kmer_b))
+                if (len(kmer_a) - max_distance) <= matched:
+                    return True
+            return False

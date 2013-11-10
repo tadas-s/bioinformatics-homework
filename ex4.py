@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import fileinput
 import re
-from bio.lib import Genome
+from bio import Genome
 
 
 def main():

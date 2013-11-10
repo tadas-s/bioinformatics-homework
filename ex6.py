@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import fileinput
-from bio.lib import Genome
+from bio import Genome
 
 
 def main():

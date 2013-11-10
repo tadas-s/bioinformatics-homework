@@ -1,12 +1,23 @@
 import re
 import networkx as nx
 
+
 class Genome(str):
     """ Silly genome class """
 
     def __new__(cls, content):
         instance = str.__new__(cls, re.sub('[^ctagCTAG]', '', content))
         return instance
+
+    def kmers_of(self, k):
+        """ Quantity of k-mers in genome
+        @param k: int
+        @return: int
+        """
+        if k < 1:
+            raise ValueError("There is no such thing as %s-mer" % (k,))
+
+        return max(0, len(self) - k + 1)
 
     def most_repeated(self, k):
         """ Find most repeated k-mers in genome.
@@ -33,13 +44,16 @@ class Genome(str):
         top_result = -1
         top_set = []
 
-        for clique in nx.find_cliques(gr):
-            current_count = sum(gr.node[node]['count'] for node in clique)
+        for node, data in gr.nodes_iter(data=True):
+            current_count = data['count']
+            for neighbor in gr.neighbors_iter(node):
+                current_count += gr.node[neighbor]['count']
+
             if current_count == top_result:
-                top_set.append(clique)
+                top_set.append(node)
             elif current_count > top_result:
                 top_result = current_count
-                top_set = clique
+                top_set = [node]
 
         return top_set
 
@@ -168,3 +182,28 @@ class Genome(str):
             return False
         else:
             return Genome.is_similar(str1,  str2, max_diff)
+
+    def kmer_nucleotide_frequencies(self, k):
+        """ Find nucleotide frequencies of all k-mers in genome """
+        frequencies = []
+        for i in range(k):
+            frequencies.append({'c': 0, 't': 0, 'a': 0, 'g': 0})
+
+        for i in range(0, self.kmers_of(k)):
+            for j, nucleotide in enumerate(self[i:i+k]):
+                frequencies[j][nucleotide.lower()] += 1
+
+        return frequencies
+
+    def kmer_nucleotide_probabilities(self, k):
+        """ Find probabilities of nucleotide appearance in positions from 0 to k
+        @param k: int
+        @return: list
+        """
+        total_kmers = float(self.kmers_of(k))
+        probabilities = {}
+
+        for index, frequencies in enumerate(self.kmer_nucleotide_frequencies(k)):
+            probabilities[index] = dict(map(lambda nuc: (nuc[0], nuc[1] / total_kmers), frequencies.iteritems()))
+
+        return probabilities

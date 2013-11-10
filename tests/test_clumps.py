@@ -1,5 +1,5 @@
 from nose.tools import *
-from bio.lib import Genome
+from bio import Genome
 
 
 def test_empty():

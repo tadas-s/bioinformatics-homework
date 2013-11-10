@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import sys
 import fileinput
-from bio.lib import Genome
-
+from bio import Genome
 
 def main(argv):
     for line in fileinput.input(argv[2]):

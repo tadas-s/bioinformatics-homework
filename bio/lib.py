@@ -27,15 +27,17 @@ class Genome(str):
 
         for node_a in gr.nodes_iter():
             for node_b in gr.nodes_iter():
-                if not gr.has_edge(node_a, node_b) and Genome.is_similar(node_a, node_b, d):
+                if not gr.has_edge(node_a, node_b) and Genome.is_similar_but_not_equal(node_a, node_b, d):
                     gr.add_edge(node_a, node_b)
 
-        top_result = 0;
+        top_result = -1
         top_set = []
 
         for clique in nx.find_cliques(gr):
             current_count = sum(gr.node[node]['count'] for node in clique)
-            if current_count >= top_result:
+            if current_count == top_result:
+                top_set.append(clique)
+            elif current_count > top_result:
                 top_result = current_count
                 top_set = clique
 
@@ -135,27 +137,34 @@ class Genome(str):
         return tuple(filter(lambda i: values[i] == minimum, range(0, len(values))))
 
     @staticmethod
-    def is_similar(kmer_a, kmer_b, max_distance):
+    def is_similar(str1, str2, max_diff):
         """ Silly k-mers of the same lenght comparison with up to max_distance modifications
         @param str kmer_a:
         @param str kmer_b:
         @param str max_distance:
         @return: str
         """
-        if len(kmer_a) != len(kmer_b):
+        if len(str1) != len(str2):
             raise ValueError('Cannot compare kmers of different length')
-        if max_distance == 0 or not len(kmer_a):
-            return kmer_a.lower() == kmer_b.lower()
+        if max_diff == 0 or not len(str1):
+            return str1.lower() == str2.lower()
         else:
-            for shift in range(-max_distance, max_distance + 1):
+            for shift in range(-max_diff, max_diff + 1):
                 if shift < 0:
-                    shifted = kmer_a[-shift:] + ' '*(-shift)
+                    shifted = str1[-shift:] + ' '*(-shift)
                 elif shift == 0:
-                    shifted = kmer_a
+                    shifted = str1
                 else: # shift > 0
-                    shifted = ' '*shift + kmer_a[:-shift]
+                    shifted = ' '*shift + str1[:-shift]
 
-                matched = sum(c[0] == c[1] for c in zip(shifted, kmer_b))
-                if (len(kmer_a) - max_distance) <= matched:
+                matched = sum(c[0] == c[1] for c in zip(shifted, str2))
+                if (len(str1) - max_diff) <= matched:
                     return True
             return False
+
+    @staticmethod
+    def is_similar_but_not_equal(str1, str2, max_diff):
+        if str1 == str2:
+            return False
+        else:
+            return Genome.is_similar(str1,  str2, max_diff)

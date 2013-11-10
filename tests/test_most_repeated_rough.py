@@ -2,10 +2,12 @@ from nose.tools import *
 from bio.lib import Genome
 from mock import patch
 
+
 def test_most_repeated_rough():
+    assert_equal(set(['GATG', 'ATGC', 'ATGT']), Genome('ACGTTGCATGTCGCATGATGCATGAGAGCT').most_repeated_rough(4, 1))
+    assert_equal(set(['GCACACAGAC', 'GCGCACACAC']), Genome('CACAGTAGGCGCCGGCACACACAGCCCCGGGCCCCGGGCCGCCCCGGGCCGGCGGCCGCCGGCGCCGGCACACCGGCACAGCCGTACCGGCACAGTAGTACCGGCCGGCCGGCACACCGGCACACCGGGTACACACCGGGGCGCACACACAGGCGGGCGCCGGGCCCCGGGCCGTACCGGGCCGCCGGCGGCCCACAGGCGCCGGCACAGTACCGGCACACACAGTAGCCCACACACAGGCGGGCGGTAGCCGGCGCACACACACACAGTAGGCGCACAGCCGCCCACACACACCGGCCGGCCGGCACAGGCGGGCGGGCGCACACACACCGGCACAGTAGTAGGCGGCCGGCGCACAGCC').most_repeated_rough(10, 2))
     #assert_equal(set(['ccc', 'cct']), Genome('cccct').most_repeated_rough_top(3, 1))
     #assert_equal(set(['ccc', 'cct']), Genome('cccctggg').most_repeated_rough_top(3, 1))
-    assert_equal(set(['GATG', 'ATGC', 'ATGT']), Genome('ACGTTGCATGTCGCATGATGCATGAGAGCT').most_repeated_rough(4, 1))
 
 def test_zero_uses_simple_search():
     with patch.object(Genome, 'most_repeated') as mock_method:

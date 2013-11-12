@@ -52,9 +52,9 @@ class Genome(str):
         for candidate in kmer_probability_generator(self.kmer_nucleotide_probabilities(k)):
             current_count = 0
 
-            for kmer in mr.iterkeys():
+            for kmer, count in mr.iteritems():
                 if Genome.is_similar_simple(candidate, kmer, d):
-                    current_count += mr[kmer]
+                    current_count += count
 
             if current_count > top_count:
                 top_count = current_count

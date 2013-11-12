@@ -13,12 +13,17 @@ def kmer_probability_generator(probabilities):
 
 def kmer_probability_generator(probabilities):
     sorted_nucleotides = []
+    indexes = []
+    k = len(probabilities)
 
     for p in probabilities:
         sorted_nucleotides.append(sorted(p.iterkeys(), key=lambda k: p[k], reverse=True))
+        indexes.append(range(4))
 
-    for sequence in product(*sorted_nucleotides):
-        yield ''.join(sequence)
+    for range_sum in range(k*4):
+        for sequence in product(*indexes):
+            if sum(sequence) == range_sum:
+                yield ''.join(map(lambda (index, nucleotide_index): sorted_nucleotides[index][nucleotide_index], enumerate(sequence)))
 
 
 def kmer_probability_generator_alternative_needs_work(probabilities):

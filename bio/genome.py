@@ -1,5 +1,6 @@
 import re
 import networkx as nx
+from bio.generators import kmer_probability_generator
 
 
 class Genome(str):
@@ -29,31 +30,39 @@ class Genome(str):
         return result
 
     def most_repeated_rough(self, k, d):
-        mr = self.most_repeated(k)
 
         gr = nx.Graph()
 
-        for k_mer in mr.iterkeys():
-            gr.add_node(k_mer, {'count': mr[k_mer]})
+        # Take most frequent kmers ....
+        mr = self.most_repeated(k)
 
-        for node_a in gr.nodes_iter():
-            for node_b in gr.nodes_iter():
-                if not gr.has_edge(node_a, node_b) and Genome.is_similar_but_not_equal(node_a, node_b, d):
-                    gr.add_edge(node_a, node_b)
+        # Put it to a graph
+        #for k_mer in mr.iterkeys():
+        #    gr.add_node(k_mer, {'count': mr[k_mer]})
 
-        top_result = -1
+        # And connect by edges if node_a and node_b has no more than d differences
+        #for node_a in gr.nodes_iter():
+        #    for node_b in gr.nodes_iter():
+        #        if not gr.has_edge(node_a, node_b) and Genome.is_similar_but_not_equal(node_a, node_b, d):
+        #            gr.add_edge(node_a, node_b)
+
+        top_count = -1
         top_set = []
 
-        for node, data in gr.nodes_iter(data=True):
-            current_count = data['count']
-            for neighbor in gr.neighbors_iter(node):
-                current_count += gr.node[neighbor]['count']
+        for candidate in kmer_probability_generator(self.kmer_nucleotide_probabilities(k)):
+            current_count = 0
 
-            if current_count == top_result:
-                top_set.append(node)
-            elif current_count > top_result:
-                top_result = current_count
-                top_set = [node]
+            for kmer in mr.iterkeys():
+                if Genome.is_similar_simple(candidate, kmer, d):
+                    current_count += mr[kmer]
+
+            if current_count > top_count:
+                top_count = current_count
+                top_set = [candidate.upper()]
+                print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
+            elif current_count == top_count:
+                top_set.append(candidate.upper())
+                print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
 
         return top_set
 
@@ -163,6 +172,9 @@ class Genome(str):
         if max_diff == 0 or not len(str1):
             return str1.lower() == str2.lower()
         else:
+            str1 = str1.lower()
+            str2 = str2.lower()
+
             for shift in range(-max_diff, max_diff + 1):
                 if shift < 0:
                     shifted = str1[-shift:] + ' '*(-shift)
@@ -174,6 +186,28 @@ class Genome(str):
                 matched = sum(c[0] == c[1] for c in zip(shifted, str2))
                 if (len(str1) - max_diff) <= matched:
                     return True
+            return False
+
+    @staticmethod
+    def is_similar_simple(str1, str2, max_diff):
+        """ Silly k-mers of the same lenght comparison with up to max_distance modifications
+        @param str kmer_a:
+        @param str kmer_b:
+        @param str max_distance:
+        @return: str
+        """
+        if len(str1) != len(str2):
+            raise ValueError('Cannot compare kmers of different length')
+        if max_diff == 0 or not len(str1):
+            return str1.lower() == str2.lower()
+        else:
+            str1 = str1.lower()
+            str2 = str2.lower()
+
+            matched = sum(c[0] == c[1] for c in zip(str1, str2))
+            if (len(str1) - max_diff) <= matched:
+                return True
+
             return False
 
     @staticmethod
@@ -201,9 +235,9 @@ class Genome(str):
         @return: list
         """
         total_kmers = float(self.kmers_of(k))
-        probabilities = {}
+        probabilities = []
 
-        for index, frequencies in enumerate(self.kmer_nucleotide_frequencies(k)):
-            probabilities[index] = dict(map(lambda nuc: (nuc[0], nuc[1] / total_kmers), frequencies.iteritems()))
+        for frequencies in self.kmer_nucleotide_frequencies(k):
+            probabilities.append(dict(map(lambda nuc: (nuc[0], nuc[1] / total_kmers), frequencies.iteritems())))
 
         return probabilities

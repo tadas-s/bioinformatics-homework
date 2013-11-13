@@ -25,43 +25,33 @@ class Genome(str):
         Returns dict mapping of k-mer => repeats """
         result = {}
         for i in range(0, len(self) - k + 1):
-            part = self[i:i+k]
+            part = self[i:i + k]
             result[part] = result.setdefault(part, 0) + 1
         return result
 
     def most_repeated_rough(self, k, d):
-
-        gr = nx.Graph()
-
         # Take most frequent kmers ....
         mr = self.most_repeated(k)
-
-        # Put it to a graph
-        #for k_mer in mr.iterkeys():
-        #    gr.add_node(k_mer, {'count': mr[k_mer]})
-
-        # And connect by edges if node_a and node_b has no more than d differences
-        #for node_a in gr.nodes_iter():
-        #    for node_b in gr.nodes_iter():
-        #        if not gr.has_edge(node_a, node_b) and Genome.is_similar_but_not_equal(node_a, node_b, d):
-        #            gr.add_edge(node_a, node_b)
+        must_match = k - d
 
         top_count = -1
-        top_set = []
+        top_set = set([])
 
         for candidate in kmer_probability_generator(self.kmer_nucleotide_probabilities(k)):
+            candidate = candidate.upper()
             current_count = 0
 
             for kmer, count in mr.iteritems():
-                if Genome.is_similar_simple(candidate, kmer, d):
+                matched = sum(candidate[index] == kmer[index] for index in range(k))
+                if matched >= must_match:
                     current_count += count
-
+                
             if current_count > top_count:
                 top_count = current_count
-                top_set = [candidate.upper()]
+                top_set = set([candidate.upper()])
                 print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
             elif current_count == top_count:
-                top_set.append(candidate.upper())
+                top_set.add(candidate.upper())
                 print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
 
         return top_set
@@ -103,7 +93,7 @@ class Genome(str):
         pattern = tuple(pattern)
 
         for i in range(0, len(self) - len(pattern) + 1):
-            matched = sum(map(lambda e: e[0] == e[1], zip(pattern, self[i:i+pattern_length])))
+            matched = sum(map(lambda e: e[0] == e[1], zip(pattern, self[i:i + pattern_length])))
             if matched >= min_matches:
                 positions.add(i)
 
@@ -127,8 +117,8 @@ class Genome(str):
 
         # Then slide the window and subtract one structure that went out of the window and add one that was introduced
         for i in range(1, len(self) - region):
-            removed = self[i-1:i+k-1]
-            introduced = self[i+region-k:i+region]
+            removed = self[i - 1:i + k - 1]
+            introduced = self[i + region - k:i + region]
             most_repeated[removed] -= 1
             most_repeated[introduced] = most_repeated.setdefault(introduced, 0) + 1
 
@@ -177,11 +167,11 @@ class Genome(str):
 
             for shift in range(-max_diff, max_diff + 1):
                 if shift < 0:
-                    shifted = str1[-shift:] + ' '*(-shift)
+                    shifted = str1[-shift:] + ' ' * (-shift)
                 elif shift == 0:
                     shifted = str1
                 else: # shift > 0
-                    shifted = ' '*shift + str1[:-shift]
+                    shifted = ' ' * shift + str1[:-shift]
 
                 matched = sum(c[0] == c[1] for c in zip(shifted, str2))
                 if (len(str1) - max_diff) <= matched:
@@ -215,7 +205,7 @@ class Genome(str):
         if str1 == str2:
             return False
         else:
-            return Genome.is_similar(str1,  str2, max_diff)
+            return Genome.is_similar(str1, str2, max_diff)
 
     def kmer_nucleotide_frequencies(self, k):
         """ Find nucleotide frequencies of all k-mers in genome """
@@ -224,7 +214,7 @@ class Genome(str):
             frequencies.append({'c': 0, 't': 0, 'a': 0, 'g': 0})
 
         for i in range(0, self.kmers_of(k)):
-            for j, nucleotide in enumerate(self[i:i+k]):
+            for j, nucleotide in enumerate(self[i:i + k]):
                 frequencies[j][nucleotide.lower()] += 1
 
         return frequencies

@@ -45,13 +45,45 @@ class Genome(str):
                 matched = sum(candidate[index] == kmer[index] for index in range(k))
                 if matched >= must_match:
                     current_count += count
-                
+
             if current_count > top_count:
                 top_count = current_count
                 top_set = set([candidate.upper()])
                 print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
             elif current_count == top_count:
                 top_set.add(candidate.upper())
+                print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
+
+        return top_set
+
+    def most_repeated_rough_with_reverse_complements(self, k, d):
+        # Take most frequent kmers ....
+        mr = self.most_repeated(k)
+        must_match = k - d
+
+        top_count = -1
+        top_set = set([])
+
+        for candidate in kmer_probability_generator(self.kmer_nucleotide_probabilities(k)):
+            candidate = candidate.upper()
+            candidate_revc = Genome(candidate).reverse_complement()
+            current_count = 0
+
+            for kmer, count in mr.iteritems():
+                matched = sum(candidate[index] == kmer[index] for index in range(k))
+                if matched >= must_match:
+                    current_count += count
+                matched = sum(candidate_revc[index] == kmer[index] for index in range(k))
+                if matched >= must_match:
+                    current_count += count
+
+            if current_count > top_count:
+                top_count = current_count
+                top_set = set([candidate, candidate_revc])
+                print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
+            elif current_count == top_count:
+                top_set.add(candidate)
+                top_set.add(candidate_revc)
                 print "top: %s, set:\n%s" % (top_count, "\n".join(top_set))
 
         return top_set

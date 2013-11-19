@@ -1,7 +1,6 @@
 import re
-import networkx as nx
 from bio.generators import kmer_probability_generator
-
+import bio
 
 class Genome(str):
     """ Silly genome class """
@@ -263,3 +262,9 @@ class Genome(str):
             probabilities.append(dict(map(lambda nuc: (nuc[0], nuc[1] / total_kmers), frequencies.iteritems())))
 
         return probabilities
+
+    def translate(self):
+        """
+        @return: bio.RNA
+        """
+        return bio.RNA(self)

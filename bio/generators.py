@@ -1,5 +1,5 @@
 from itertools import product
-
+import bio
 
 def kmer_probability_generator(probabilities):
     sorted_nucleotides = []
@@ -52,3 +52,29 @@ def kmer_probability_generator_alternative_needs_work(probabilities):
             offsets[offset_index] += 1
         else:
             break
+
+
+def subpeptides(peptide):
+    closed = peptide + peptide
+
+    for length in range(1, len(peptide)+1):
+        visited = set([])
+        for start in range(len(peptide)):
+            pep = closed[start:start+length]
+            if pep not in visited:
+                yield pep
+            visited.add(pep)
+
+
+def cyclospectrum(peptide):
+    closed = peptide + peptide
+
+    yield 0  # for some reason.. it's there
+
+    for length in range(1, len(peptide)+1):
+        generated = set([])
+        for start in range(len(peptide)):
+            mass = bio.Peptide(closed[start:start+length]).integer_mass()
+            if mass not in generated:
+                yield mass
+            generated.add(mass)

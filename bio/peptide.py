@@ -70,6 +70,29 @@ peptide_translation_table = {
     'UUU': 'F'
 }
 
+peptide_integer_masses = {
+    'G': 57,
+    'A': 71,
+    'S': 87,
+    'P': 97,
+    'V': 99,
+    'T': 101,
+    'C': 103,
+    'I': 113,
+    'L': 113,
+    'N': 114,
+    'D': 115,
+    'K': 128,
+    'Q': 128,
+    'E': 129,
+    'M': 131,
+    'H': 137,
+    'F': 147,
+    'R': 156,
+    'Y': 163,
+    'W': 186,
+}
+
 
 class Peptide(str):
     """ Silly Peptide class """
@@ -85,6 +108,9 @@ class Peptide(str):
             return ''.join(map(lambda chunk: peptide_translation_table[chunk], chunker(str(rna).upper(), 3)))
         else:
             raise ValueError('Expected instance of bio.RNA but got %s' % type(rna))
+
+    def integer_mass(self):
+        return sum(map(lambda p: peptide_integer_masses[p], self))
 
 
 class Translator:

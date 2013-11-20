@@ -2,6 +2,7 @@ import re
 from bio.generators import kmer_probability_generator
 import bio
 
+
 class Genome(str):
     """ Silly genome class """
 
@@ -268,3 +269,16 @@ class Genome(str):
         @return: bio.RNA
         """
         return bio.RNA(self)
+
+    def transcribe(self):
+        """
+        @return: bio.Peptide
+        """
+        return self.translate().transcribe()
+
+    def transcribes_to(self, peptide):
+        """ Test if given DNA sequence or it's revc translates to given peptide
+        @param peptide: bio.Peptide
+        @return: bool
+        """
+        return (self.transcribe() == peptide) or (Genome(self.reverse_complement()).transcribe() == peptide)

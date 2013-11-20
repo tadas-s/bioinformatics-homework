@@ -1,7 +1,7 @@
 import re
 import bio
 from bio.iterators import chunker
-
+from string import maketrans
 
 peptide_translation_table = {
     'AAA': 'K',
@@ -85,3 +85,49 @@ class Peptide(str):
             return ''.join(map(lambda chunk: peptide_translation_table[chunk], chunker(str(rna).upper(), 3)))
         else:
             raise ValueError('Expected instance of bio.RNA but got %s' % type(rna))
+
+
+class Translator:
+    __rna_to_peptide = None
+    __dna_to_peptide = None
+    __peptide_to_rna = None
+    __peptide_to_dna = None
+
+    @staticmethod
+    def rna_to_peptide(table=None):
+        """
+        @param table: dict set translation table
+        @return: dict
+        """
+        if table is not None:
+            Translator.reset()
+            Translator.__rna_to_peptide = table
+        elif Translator.__rna_to_peptide is None:
+            Translator.__rna_to_peptide = peptide_translation_table
+
+        return Translator.__rna_to_peptide
+
+    @staticmethod
+    def dna_to_peptide():
+        if Translator.__dna_to_peptide is None:
+            translation = maketrans('uU', 'tT')
+            Translator.__dna_to_peptide = dict(
+                map(lambda item: (item[0].translate(translation), item[1]), Translator.rna_to_peptide().iteritems())
+            )
+
+        return Translator.__dna_to_peptide
+
+    @staticmethod
+    def peptide_to_rna():
+        pass
+
+    @staticmethod
+    def peptide_to_dna():
+        pass
+
+    @staticmethod
+    def reset():
+        Translator.__rna_to_peptide = None
+        Translator.__dna_to_peptide = None
+        Translator.__peptide_to_rna = None
+        Translator.__peptide_to_dna = None

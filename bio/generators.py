@@ -1,6 +1,7 @@
 from itertools import product
 import bio
 
+
 def kmer_probability_generator(probabilities):
     sorted_nucleotides = []
 

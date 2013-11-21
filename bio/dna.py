@@ -3,7 +3,7 @@ from bio.generators import kmer_probability_generator
 import bio
 
 
-class Genome(str):
+class DNA(str):
     """ Silly genome class """
 
     def __new__(cls, content):
@@ -66,7 +66,7 @@ class Genome(str):
 
         for candidate in kmer_probability_generator(self.kmer_nucleotide_probabilities(k)):
             candidate = candidate.upper()
-            candidate_revc = Genome(candidate).reverse_complement()
+            candidate_revc = DNA(candidate).reverse_complement()
             current_count = 0
 
             for kmer, count in mr.iteritems():
@@ -140,7 +140,7 @@ class Genome(str):
         @param times: int
         """
         # Find most repeated items in the first window
-        most_repeated = Genome(self[:region]).most_repeated(k)
+        most_repeated = DNA(self[:region]).most_repeated(k)
         clumps = set()
 
         for pattern in most_repeated.iterkeys():
@@ -237,7 +237,7 @@ class Genome(str):
         if str1 == str2:
             return False
         else:
-            return Genome.is_similar(str1, str2, max_diff)
+            return DNA.is_similar(str1, str2, max_diff)
 
     def kmer_nucleotide_frequencies(self, k):
         """ Find nucleotide frequencies of all k-mers in genome """
@@ -281,4 +281,4 @@ class Genome(str):
         @param peptide: bio.Peptide
         @return: bool
         """
-        return (self.transcribe() == peptide) or (Genome(self.reverse_complement()).transcribe() == peptide)
+        return (self.transcribe() == peptide) or (DNA(self.reverse_complement()).transcribe() == peptide)

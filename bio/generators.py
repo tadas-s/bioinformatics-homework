@@ -69,12 +69,12 @@ def subpeptides(peptide):
 def cyclospectrum(peptide):
     closed = peptide + peptide
 
-    yield 0  # for some reason.. it's there
+    # for some reason.. it's always in result
+    yield 0
 
-    for length in range(1, len(peptide)+1):
-        generated = set([])
+    for length in range(1, len(peptide)):
         for start in range(len(peptide)):
-            mass = bio.Peptide(closed[start:start+length]).integer_mass()
-            if mass not in generated:
-                yield mass
-            generated.add(mass)
+            yield bio.Peptide(closed[start:start+length]).integer_mass()
+
+    # edge case - while all others have
+    yield bio.Peptide(peptide).integer_mass()
